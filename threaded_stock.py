@@ -2,6 +2,7 @@ import urllib.request
 import time
 import threading
 from queue import Queue
+
 from bs4 import BeautifulSoup as Soup
 
 letters = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n',
@@ -28,7 +29,7 @@ def getStockAbbreviations(letter):
     file.close()
 
 def formatFile(letter):
-    file = open("stock_abb_" + letter + ".txt", "w")
+    file = open("abbreviations/stock_abb_" + letter + ".txt", "w")
     file.seek(0)
     file.truncate()
     return file
@@ -40,14 +41,11 @@ def parseHtml(html, file):
     soup = Soup(html, "html.parser")
     data = soup.find("table", {"class" : "quotes"})
     for item in data.findAll('a'):
-        content = str(item.contents)
+        content = str(item.contents[0])
         if "img" in content:
             continue
         else:
-            file.write(extract(content) + "\n")
-
-def extract(content):
-    return content[content.index("[") + 1:content.rindex("]")].replace("\'", "")
+            file.write(content + "\n")
 
 def worker():
     while True:
