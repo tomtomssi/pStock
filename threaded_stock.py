@@ -3,6 +3,7 @@ import time
 import threading
 from queue import Queue
 
+import psycopg2
 from bs4 import BeautifulSoup as Soup
 
 letters = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n',
@@ -28,14 +29,34 @@ def getStockAbbreviations(letter):
 
     file.close()
 
+
+def query_database(content):
+
+    conn_string = "host='localhost' dbname='stock' user='xx' password='xx'"
+
+    print("Connecting to database\n	->%s" % (conn_string))
+
+    connection = psycopg2.connect(conn_string)
+
+    cursor = connection.cursor()
+    print('Inserting value "%s" into the database...', content)
+
+    cursor.execute("INSERT INTO abbreviations (name) VALUES(%s)", [content])
+    connection.commit()
+
+    connection.close()
+
+
 def formatFile(letter):
     file = open("abbreviations/stock_abb_" + letter + ".txt", "w")
     file.seek(0)
     file.truncate()
     return file
 
+
 def getHeaderData(html):
     print("Content size: " + html.headers["content-length"])
+
 
 def parseHtml(html, file):
     soup = Soup(html, "html.parser")
@@ -45,7 +66,8 @@ def parseHtml(html, file):
         if "img" in content:
             continue
         else:
-            file.write(content + "\n")
+            query_database(content)
+
 
 def worker():
     while True:
