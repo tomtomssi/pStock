@@ -5,20 +5,16 @@ import psycopg2
 from bs4 import BeautifulSoup as Soup
 
 
-class InsertStockData:
-    def __init__(self):
-        pass
+def query_for_abbreviations():
+    conn_string = "host='localhost' dbname='stock' user='xx' password='xx'"
 
-    def query_for_abbreviations(self):
-        conn_string = "host='localhost' dbname='stock' user='xx' password='xx'"
+    connection = psycopg2.connect(conn_string)
 
-        connection = psycopg2.connect(conn_string)
+    cursor = connection.cursor()
 
-        cursor = connection.cursor()
+    cursor.execute("SELECT * from abbreviations ORDER BY name")
 
-        cursor.execute("SELECT * from abbreviations ORDER BY name")
-
-        query_for_data(connection, cursor)
+    query_for_data(connection, cursor)
 
 
 def get_stock_data(abbreviation):
@@ -39,6 +35,5 @@ def query_for_data(connection, cursor):
                        "VALUES (%s, %s)", [get_stock_data(item[0]), item[1]])
         connection.commit()
 
-data = InsertStockData()
-data.query_for_abbreviations()
+query_for_abbreviations()
 
