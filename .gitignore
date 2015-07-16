@@ -157,4 +157,7 @@ docs/_build/
 # PyBuilder
 target/
 
+# Resources
+resources/
+
 
