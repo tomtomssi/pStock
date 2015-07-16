@@ -4,9 +4,14 @@ import urllib.request
 import psycopg2
 from bs4 import BeautifulSoup as Soup
 
+import config_parser
+
 
 def query_for_abbreviations():
-    conn_string = "host='localhost' dbname='stock' user='xx' password='xx'"
+    config = config_parser.ParseConfig()
+
+    conn_string = "host='{0}'dbname='{1}'user='{2}'password='{3}'".format(config.get_host(), config.get_database(), config.get_username(), config.get_password())
+    print("Connecting to database\n")
 
     connection = psycopg2.connect(conn_string)
 
