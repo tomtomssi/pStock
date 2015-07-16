@@ -6,6 +6,8 @@ from queue import Queue
 import psycopg2
 from bs4 import BeautifulSoup as Soup
 
+import config_parser
+
 letters = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n',
            'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z']
 lock = threading.Lock()
@@ -23,18 +25,14 @@ def getStockAbbreviations(letter):
     print("Finished in: " + str(time.time() - start_time))
     getHeaderData(html)
 
-    file = formatFile(letter)
-
-    parseHtml(html, file)
-
-    file.close()
+    parseHtml(html)
 
 
 def query_database(content):
+    config = config_parser.ParseConfig()
 
-    conn_string = "host='localhost' dbname='stock' user='xx' password='xx'"
-
-    print("Connecting to database\n	->%s" % (conn_string))
+    conn_string = "host='{0}'dbname='{1}'user='{2}'password='{3}'".format(config.get_host(), config.get_database(), config.get_username(), config.get_password())
+    print("Connecting to database\n")
 
     connection = psycopg2.connect(conn_string)
 
@@ -47,18 +45,11 @@ def query_database(content):
     connection.close()
 
 
-def formatFile(letter):
-    file = open("abbreviations/stock_abb_" + letter + ".txt", "w")
-    file.seek(0)
-    file.truncate()
-    return file
-
-
 def getHeaderData(html):
     print("Content size: " + html.headers["content-length"])
 
 
-def parseHtml(html, file):
+def parseHtml(html):
     soup = Soup(html, "html.parser")
     data = soup.find("table", {"class" : "quotes"})
     for item in data.findAll('a'):
